@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Translator Translator Translator</title>
+  <meta name="description" content="A translator that translates using only translations. Word embeddings, rotation matrices, zero understanding. Runs entirely in your browser.">
+  <meta name="theme-color" content="#0a0b0d">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a0b0d'/%3E%3Cpath d='M9 6H6v20h3M23 6h3v20h-3' stroke='%2358c4dd' stroke-width='2.5' fill='none'/%3E%3Ccircle cx='16' cy='11' r='2.4' fill='%23fff'/%3E%3Ccircle cx='16' cy='21' r='2.4' fill='%2358c4dd'/%3E%3C/svg%3E">
+  <link rel="preload" href="fonts/cmu-serif-500-roman.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <header class="hero">
+    <h1 id="title"><span>Translator</span> <span>Translator</span> <span>Translator</span></h1>
+    <p class="tagline">A translator that translates using <em>only translations</em>.</p>
+    <p class="subtag">Your word becomes 128 numbers, gets multiplied by a matrix or two, and comes out the other side as a different word. Often even a related one.</p>
+  </header>
+
+  <main>
+    <section class="console" aria-label="Translator controls">
+      <div class="row langs">
+        <label class="field">
+          <span class="field-label">From</span>
+          <select id="src" aria-label="Source language"></select>
+        </label>
+        <button id="swap" class="icon-btn" type="button" aria-label="Swap languages" title="Swap languages">⇄</button>
+        <label class="field">
+          <span class="field-label">To</span>
+          <select id="tgt" aria-label="Target language"></select>
+        </label>
+      </div>
+
+      <form class="row ask" id="ask" autocomplete="off">
+        <div class="input-wrap">
+          <input id="word" type="text" spellcheck="false" autocapitalize="off" placeholder="Type a word…" aria-label="Word to translate" aria-autocomplete="list" aria-controls="suggest">
+          <ul id="suggest" class="suggest" role="listbox" hidden></ul>
+        </div>
+        <button id="go" class="primary" type="submit">Translate</button>
+        <button id="random" class="ghost" type="button" title="Pick a random word">Random word</button>
+      </form>
+
+      <div class="row options">
+        <div class="segmented" id="mode" role="radiogroup" aria-label="Translation mode">
+          <button type="button" role="radio" data-mode="express" aria-checked="true">Express</button>
+          <button type="button" role="radio" data-mode="telephone" aria-checked="false">Telephone</button>
+        </div>
+        <div class="route" id="route" aria-label="Route"></div>
+        <button id="detour" class="ghost small" type="button" title="Add a stopover language">+ detour</button>
+        <button id="tour" class="ghost small" type="button" title="Telephone through every language and back home">Grand Tour</button>
+        <div class="segmented speed" id="speed" role="radiogroup" aria-label="Animation speed">
+          <button type="button" role="radio" data-speed="1" aria-checked="true">1×</button>
+          <button type="button" role="radio" data-speed="2" aria-checked="false">2×</button>
+          <button type="button" role="radio" data-speed="4" aria-checked="false">4×</button>
+          <button type="button" role="radio" data-speed="0" aria-checked="false" title="Skip the animation">skip</button>
+        </div>
+      </div>
+      <p class="hint" id="mode-hint"></p>
+    </section>
+
+    <section class="stage" aria-label="Visualisation">
+      <div class="caption" aria-live="polite">
+        <div class="step" id="step">Waiting for a word.</div>
+        <div class="quip" id="quip">The matrices are bored.</div>
+      </div>
+      <ol class="progress" id="progress" aria-label="Route progress"></ol>
+      <div class="panels">
+        <figure class="panel space">
+          <canvas id="space" aria-label="2D view of the embedding space"></canvas>
+          <figcaption class="panel-label" id="space-label">ℝ¹²⁸, viewed from a flattering angle</figcaption>
+        </figure>
+        <figure class="panel math">
+          <canvas id="math" aria-label="The arithmetic"></canvas>
+          <figcaption class="panel-label" id="math-label">The arithmetic</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="result" id="result" aria-live="polite" hidden></section>
+
+    <section class="explainer" id="how">
+      <h2>How it works</h2>
+      <p class="lede">Short version: <em>we used translations to build a translator, which we then use to make translations.</em> Long version:</p>
+
+      <ol class="steps">
+        <li>
+          <h3>Every word is a point</h3>
+          <p>Each language gets its own <em>word embedding</em>: a cloud of points in a high-dimensional space, learned from mountains of text, where words that show up in similar places land near each other. <span class="w">katt</span> sits near <span class="w">hund</span>, <span class="w">gato</span> near <span class="w">perro</span>. We squash each cloud down to 128 dimensions so it fits through your internet connection.</p>
+          <p>Crucially, each cloud was learned <em>separately</em>. Dimension 37 of Norwegian space has nothing to do with dimension 37 of English space. They have never met.</p>
+        </li>
+        <li>
+          <h3>The clouds have the same shape</h3>
+          <p>Here's the trick (<a href="https://arxiv.org/abs/1309.4168">Mikolov et&nbsp;al., 2013</a>): since every language needs to talk about cats, dogs, beer and taxes, the clouds end up with roughly the same <em>shape</em>. One is approximately a rotated version of the other. So if we can find the rotation, we can translate.</p>
+        </li>
+        <li>
+          <h3>Find the rotation… using translations</h3>
+          <p>Take a few thousand known translation pairs, stack the Norwegian vectors in <span class="m">X</span> and the matching English ones in <span class="m">Y</span>, and find the rotation that lines them up best:</p>
+          <p class="formula"><span class="m">W</span> = arg min<sub>W<sup>⊤</sup>W = I</sub> ‖<span class="m">XW</span> − <span class="m">Y</span>‖ = <span class="m">UV</span><sup>⊤</sup>, &nbsp;where&nbsp; <span class="m">U</span>Σ<span class="m">V</span><sup>⊤</sup> = svd(<span class="m">X</span><sup>⊤</sup><span class="m">Y</span>)</p>
+          <p>That's the <em>orthogonal Procrustes problem</em>, solved in one line. Then we polish it with a few rounds of self-learning (<a href="https://aclanthology.org/P17-1042/">Artetxe et&nbsp;al., 2017</a>). Yes: to build the translator we first needed a pile of translations. We are aware. Please do not tell the philosophers.</p>
+        </li>
+        <li>
+          <h3>Everything goes through English</h3>
+          <p>Our dictionaries all go to and from English, so English is the hub. Norwegian → Japanese is really Norwegian → English → Japanese:</p>
+          <p class="formula"><span class="m">v</span><sub>ja</sub> = <span class="m">W</span><sub>ja</sub><sup>⊤</sup> <span class="m">W</span><sub>no</sub> <span class="m">v</span><sub>no</sub></p>
+          <p>Rotations are their own undo button (<span class="m">W</span><sup>⊤</sup> = <span class="m">W</span><sup>−1</sup>), so one matrix per language is enough. A side effect: in Express mode, detours cancel out <em>exactly</em>. You can route through Greek and Polish and the vector won't notice a thing.</p>
+        </li>
+        <li>
+          <h3>Pick the nearest word</h3>
+          <p>The rotated vector almost never lands exactly on a word, so we take the closest one by cosine similarity. In <strong>Telephone</strong> mode we do that at every stop, which is where things start to drift. Sometimes hilariously.</p>
+          <p>That's it. That's the whole translator. No grammar, no context, no idea what any of it means.</p>
+        </li>
+      </ol>
+
+      <h3 class="table-title">Report card</h3>
+      <div class="table-wrap">
+        <table id="stats">
+          <thead><tr><th>Language</th><th>Words known</th><th>Translations it learned from</th><th>Top guess right<sup>*</sup></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="fineprint"><sup>*</sup> Into English, on held-out words the matrix never saw, counted as right if the top guess shares a Wordnet synset with the input. Wordnet is strict and slightly odd, so treat these numbers as vibes with decimals.</p>
+
+      <h3>Credits</h3>
+      <ul class="credits">
+        <li>Word vectors: <a href="https://spacy.io/models">spaCy</a>'s Explosion vectors (CC0) and, for Japanese, <a href="https://github.com/WorksApplications/chiVe">chiVe</a> (Apache-2.0).</li>
+        <li>Translation pairs: <a href="https://github.com/omwn/omw-data">Open Multilingual Wordnet</a> and <a href="https://github.com/hdaSprachtechnologie/odenet">OdeNet</a>. Word frequencies: <a href="https://github.com/rspeer/wordfreq">wordfreq</a>.</li>
+        <li>Font: Computer Modern Unicode (SIL OFL). Look and feel: shamelessly inspired by <a href="https://www.3blue1brown.com/">3Blue1Brown</a>.</li>
+        <li>No server, no API, no AI. Everything happens in your browser, using about 16,000 multiplications per hop.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>Built with 12 word embeddings, 11 rotation matrices, and zero understanding of any language.</p>
+  </footer>
+</body>
+</html>

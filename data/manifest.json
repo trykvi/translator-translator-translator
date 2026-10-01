@@ -1,0 +1,201 @@
+{
+ "built": "2026-10-01",
+ "hub": "en",
+ "dim": 128,
+ "layout": "float32 scale[dim] | float32 W[dim*dim] row-major (y = x·W maps into hub space) | int8 vectors[words*dim]",
+ "languages": [
+  {
+   "code": "en",
+   "name": "English",
+   "native": "English",
+   "words": 15029,
+   "vectors": "en_core_web_lg",
+   "wordnets": [
+    "omw-en"
+   ]
+  },
+  {
+   "code": "no",
+   "name": "Norwegian",
+   "native": "Norsk",
+   "words": 15292,
+   "vectors": "nb_core_news_lg",
+   "wordnets": [
+    "omw-nb",
+    "omw-nn"
+   ],
+   "pairs": 5124,
+   "p1": 0.578,
+   "test": 161
+  },
+  {
+   "code": "ja",
+   "name": "Japanese",
+   "native": "日本語",
+   "words": 15192,
+   "vectors": "ja_core_news_lg",
+   "wordnets": [
+    "omw-ja"
+   ],
+   "pairs": 31815,
+   "p1": 0.435,
+   "test": 460
+  },
+  {
+   "code": "es",
+   "name": "Spanish",
+   "native": "Español",
+   "words": 15259,
+   "vectors": "es_core_news_lg",
+   "wordnets": [
+    "omw-es"
+   ],
+   "pairs": 20338,
+   "p1": 0.705,
+   "test": 305
+  },
+  {
+   "code": "de",
+   "name": "German",
+   "native": "Deutsch",
+   "words": 15316,
+   "vectors": "de_core_news_lg",
+   "wordnets": [
+    "odenet"
+   ],
+   "pairs": 18616,
+   "p1": 0.321,
+   "test": 330
+  },
+  {
+   "code": "fr",
+   "name": "French",
+   "native": "Français",
+   "words": 15245,
+   "vectors": "fr_core_news_lg",
+   "wordnets": [
+    "omw-fr"
+   ],
+   "pairs": 31492,
+   "p1": 0.652,
+   "test": 371
+  },
+  {
+   "code": "it",
+   "name": "Italian",
+   "native": "Italiano",
+   "words": 15279,
+   "vectors": "it_core_news_lg",
+   "wordnets": [
+    "omw-iwn",
+    "omw-it"
+   ],
+   "pairs": 22550,
+   "p1": 0.581,
+   "test": 339
+  },
+  {
+   "code": "pt",
+   "name": "Portuguese",
+   "native": "Português",
+   "words": 15219,
+   "vectors": "pt_core_news_lg",
+   "wordnets": [
+    "omw-pt"
+   ],
+   "pairs": 20501,
+   "p1": 0.613,
+   "test": 359
+  },
+  {
+   "code": "nl",
+   "name": "Dutch",
+   "native": "Nederlands",
+   "words": 15282,
+   "vectors": "nl_core_news_lg",
+   "wordnets": [
+    "omw-nl"
+   ],
+   "pairs": 18084,
+   "p1": 0.526,
+   "test": 304
+  },
+  {
+   "code": "pl",
+   "name": "Polish",
+   "native": "Polski",
+   "words": 15326,
+   "vectors": "pl_core_news_lg",
+   "wordnets": [
+    "omw-pl"
+   ],
+   "pairs": 5022,
+   "p1": 0.491,
+   "test": 112
+  },
+  {
+   "code": "el",
+   "name": "Greek",
+   "native": "Ελληνικά",
+   "words": 15261,
+   "vectors": "el_core_news_lg",
+   "wordnets": [
+    "omw-el"
+   ],
+   "pairs": 6036,
+   "p1": 0.64,
+   "test": 150
+  },
+  {
+   "code": "zh",
+   "name": "Chinese",
+   "native": "中文",
+   "words": 15308,
+   "vectors": "zh_core_web_lg",
+   "wordnets": [
+    "omw-cmn"
+   ],
+   "pairs": 16674,
+   "p1": 0.338,
+   "test": 340
+  }
+ ],
+ "pivot_eval": [
+  {
+   "src": "no",
+   "tgt": "ja",
+   "n": 1130,
+   "p1": 0.47
+  },
+  {
+   "src": "no",
+   "tgt": "es",
+   "n": 1156,
+   "p1": 0.592
+  },
+  {
+   "src": "ja",
+   "tgt": "es",
+   "n": 3279,
+   "p1": 0.327
+  },
+  {
+   "src": "de",
+   "tgt": "fr",
+   "n": 2482,
+   "p1": 0.392
+  },
+  {
+   "src": "es",
+   "tgt": "it",
+   "n": 2306,
+   "p1": 0.811
+  },
+  {
+   "src": "zh",
+   "tgt": "ja",
+   "n": 2468,
+   "p1": 0.415
+  }
+ ]
+}
